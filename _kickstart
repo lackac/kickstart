@@ -1,0 +1,169 @@
+#compdef kickstart
+
+_kickstart_generator_options() {
+  local task=$1
+  local section=body
+  local candidates description line option word
+  local -a entries help_lines options
+  local mix_command=@mix@
+
+  if [[ ! -x $mix_command ]]; then
+    if (( $+commands[mix] )); then
+      mix_command=mix
+    else
+      return 1
+    fi
+  fi
+
+  help_lines=("${(@f)$($mix_command help "$task" 2>/dev/null)}")
+  for line in "${help_lines[@]}"; do
+    case $line in
+      '## Options' | '## Installation')
+        section=${line#'## '}
+        continue
+        ;;
+      '## Examples')
+        section=body
+        ;;
+      '## '*)
+        section=body
+        ;;
+    esac
+
+    case $task in
+      new)
+        [[ $line == An\ \`--* || $line == A\ \`--* ]] || continue
+        ;;
+      *)
+        case $section in
+          Options)
+            [[ $line == '  * `'* ]] || continue
+            ;;
+          Installation)
+            [[ $line == *\`--* ]] || continue
+            ;;
+          *)
+            continue
+            ;;
+        esac
+        ;;
+    esac
+
+    description=$line
+    if [[ $description == *' - '* ]]; then
+      description=${description#*' - '}
+    fi
+    description=${description//\`/}
+
+    candidates=$line
+    if [[ $candidates == *' - '* ]]; then
+      candidates=${candidates%%' - '*}
+    fi
+    if [[ $task == new && $candidates == *' option'* ]]; then
+      candidates=${candidates%%' option'*}
+    fi
+
+    for word in ${(z)candidates}; do
+      [[ $word == *\`* ]] || continue
+      word=${word//\`/}
+      if [[ $word == --?* || $word == -?* ]]; then
+        option=${word%%[=,:.]*}
+        options+=("$option")
+        entries+=("$option:$description")
+      fi
+    done
+  done
+
+  (( ${#options} > 0 )) || return 1
+
+  _describe -t generator-options 'generator option' entries || compadd -- "${(@u)options}"
+}
+
+_kickstart_generator() {
+  local template=$1
+  local separator_index=$2
+  local i
+  local task
+  local -a generator_prefix
+  local -a generator_words
+
+  case $template in
+    elixir)
+      task=new
+      generator_prefix=(mix new .)
+      ;;
+    phoenix)
+      task=phx.new
+      generator_prefix=(mix phx.new .)
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+
+  generator_words=("${generator_prefix[@]}")
+  for (( i = separator_index + 1; i <= ${#words}; i++ )); do
+    generator_words+=("$words[i]")
+  done
+
+  words=("${generator_words[@]}")
+  (( CURRENT = CURRENT - separator_index + ${#generator_prefix} ))
+
+  if [[ -z $PREFIX || $PREFIX == -* ]]; then
+    _kickstart_generator_options "$task"
+    return
+  fi
+
+  _normal
+}
+
+_kickstart() {
+  local template=$words[2]
+  local separator_index=0
+  local i
+  local ret=1
+  local -a templates
+
+  templates=(sync-nixpkgs @templateWords@)
+
+  if (( CURRENT == 2 )); then
+    _describe 'template or command' templates
+    return
+  fi
+
+  if [[ $template == sync-nixpkgs ]]; then
+    return 1
+  fi
+
+  for (( i = 3; i <= ${#words}; i++ )); do
+    if [[ $words[i] == -- ]]; then
+      separator_index=$i
+      break
+    fi
+  done
+
+  if (( separator_index > 0 )); then
+    if (( CURRENT > separator_index )); then
+      _kickstart_generator $template $separator_index
+      return
+    fi
+
+    compadd -- --
+    return
+  fi
+
+  if [[ $template == elixir || $template == phoenix ]]; then
+    compadd -- --agentic && ret=0
+  fi
+
+  if (( CURRENT == 3 )); then
+    _files -/ && ret=0
+    compadd -- -- && ret=0
+    return ret
+  fi
+
+  compadd -- -- && ret=0
+  return ret
+}
+
+_kickstart "$@"

@@ -26,6 +26,21 @@
       treefmtEval = forAllSystems (system: treefmt-nix.lib.evalModule (pkgsFor system) ./treefmt.nix);
     in
     {
+      packages = forAllSystems (
+        system:
+        let
+          kickstart = import ./package.nix {
+            pkgs = pkgsFor system;
+            templateFlake = self;
+            nixpkgsRev = nixpkgs.rev;
+          };
+        in
+        {
+          inherit kickstart;
+          default = kickstart;
+        }
+      );
+
       templates = {
         elixir = {
           path = ./templates/elixir;
@@ -53,6 +68,7 @@
               pkgs.git
               pkgs.jq
               pkgs.just
+              self.packages.${system}.default
             ];
             MIX_REBAR3 = "${pkgs.beam29Packages.rebar3}/bin/rebar3";
             HEX_CACERTS_PATH = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
@@ -64,6 +80,7 @@
 
       checks = forAllSystems (system: {
         formatting = treefmtEval.${system}.config.build.check self;
+        package = self.packages.${system}.default;
       });
     };
 }

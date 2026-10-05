@@ -11,6 +11,12 @@ fmt:
 check:
   nix flake check
 
+build:
+  nix build
+
+run *args:
+  nix run . -- "$@"
+
 up:
   nix flake update
 
