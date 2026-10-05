@@ -1,0 +1,32 @@
+# https://just.systems
+
+set positional-arguments
+
+default:
+  @just --list
+
+fmt:
+  nix fmt
+
+check:
+  nix flake check
+
+up:
+  nix flake update
+
+upp input:
+  nix flake update "$1"
+
+syncup:
+  just up
+  just sync-nixpkgs
+
+syncupp input:
+  just sync-nixpkgs
+  just upp "$1"
+
+sync-nixpkgs source="../nix-config":
+  #!/usr/bin/env bash
+  set -euo pipefail
+  rev="$(nix flake metadata "$1" --json | jq -er '.locks.nodes[.locks.nodes[.locks.root].inputs.nixpkgs].locked.rev')"
+  nix flake lock --override-input nixpkgs "github:nixos/nixpkgs/$rev"

@@ -1,5 +1,5 @@
 {
-  description = "Elixir and Phoenix project bootstrap tooling";
+  description = "Nix, Elixir, and Phoenix project bootstrap tooling";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
@@ -42,6 +42,10 @@
       );
 
       templates = {
+        nix = {
+          path = ./templates/nix;
+          description = "Nix project with a development shell, formatting, and checks";
+        };
         elixir = {
           path = ./templates/elixir;
           description = "Minimal Elixir development shell";

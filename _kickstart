@@ -153,16 +153,13 @@ _kickstart() {
   fi
 
   if [[ $template == elixir || $template == phoenix ]]; then
-    compadd -- --agentic && ret=0
+    compadd -- --agentic -- && ret=0
   fi
 
   if (( CURRENT == 3 )); then
     _files -/ && ret=0
-    compadd -- -- && ret=0
-    return ret
   fi
 
-  compadd -- -- && ret=0
   return ret
 }
 

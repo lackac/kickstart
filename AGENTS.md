@@ -1,6 +1,6 @@
 # Agent Guidance
 
-Kickstart packages an Elixir/Phoenix project generator as a standalone Nix flake.
+Kickstart packages Nix, Elixir, and Phoenix project scaffolding as a standalone Nix flake.
 
 - Prefer small changes and native Nix/Mix tools.
 - Keep shell helpers in separate files and generated assets with the Elixir installer.

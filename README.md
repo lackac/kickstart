@@ -15,20 +15,29 @@ nix run . -- phoenix ../my_app --agentic --
 Or install the package and use `kickstart`:
 
 ```sh
+kickstart nix my-project
 kickstart elixir my_app
 kickstart elixir my_app -- --sup --module MyApp
 kickstart phoenix my_app -- --no-ecto
 kickstart phoenix my_app --agentic --
 ```
 
-The first form creates the project flake. Include `--` to also run the upstream
-Mix or Phoenix generator; arguments after the separator go directly to it.
+Without `--`, Kickstart creates the project flake. Include `--` to also run the
+upstream Mix or Phoenix generator; arguments after the separator go directly to it.
 Omit the project path to use the current directory. Zsh completion includes
 template names and generator options.
 
 Run `kickstart sync-nixpkgs` inside a project to align its nixpkgs lock with
 Kickstart's build. Set `KICKSTART_FLAKE` to choose another template flake and use
 its locked nixpkgs revision instead.
+
+## Nix projects
+
+`kickstart nix my-project` creates a flake with a development shell, treefmt,
+formatting checks, a `Justfile`, `.envrc`, `.gitignore`, and a short README.
+Use `just fmt`, `just check`, `just up`, and `just upp <input>` in the new project.
+Its `just sync-nixpkgs` recipe defaults to the sibling `../nix-config` checkout;
+pass a path or flake reference to use another source.
 
 ## Development tooling
 
@@ -101,4 +110,4 @@ Enter `nix develop`, then run `just` to list the commands:
 - `just test-agentic` runs the networked generated-project smoke suite.
 
 The flake exports `packages.<system>.default` (also named `kickstart`), a default
-development shell, and the `elixir`, `phoenix`, and default Elixir templates.
+development shell, and the `nix`, `elixir`, `phoenix`, and default Elixir templates.

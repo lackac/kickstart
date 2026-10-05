@@ -50,7 +50,8 @@ run_case() {
   fi
 }
 
-run_case minimal 0 elixir app
+run_case minimal 0 nix app
+jq -se 'any(.[]; .args == ["flake","init","-t","test:flake#nix"])' "$CALL_LOG" >/dev/null
 jq -se 'all(.[]; .args[0] != "develop")' "$CALL_LOG" >/dev/null
 jq -se 'any(.[]; .args == ["flake","lock","--override-input","nixpkgs","github:nixos/nixpkgs/build-revision"]) and all(.[]; .args[:2] != ["flake","metadata"])' "$CALL_LOG" >/dev/null
 
@@ -100,7 +101,7 @@ unset FAIL_COMMAND
 
 run_case missing-generator 64 elixir app --agentic
 test ! -s "$CALL_LOG"
-run_case unsupported-template 64 other app --agentic --
+run_case unsupported-template 64 nix app --agentic --
 test ! -s "$CALL_LOG"
 run_case umbrella 64 phoenix app --agentic -- --umbrella
 test ! -s "$CALL_LOG"
@@ -128,5 +129,13 @@ words=(kickstart phoenix app -- --agentic --)
 CURRENT=6
 _kickstart
 [[ $(< "$COMPLETION_LOG") == /user/mix ]] || exit 1
+compadd() { printf '%s\n' "$@" >> "$COMPLETION_LOG"; }
+_files() { return 0; }
+: > "$COMPLETION_LOG"
+PREFIX=''
+words=(kickstart nix '')
+CURRENT=3
+_kickstart
+[[ ! -s "$COMPLETION_LOG" ]] || exit 1
 ZSH
 printf 'Orchestration and checkpoint checks passed.\n'
