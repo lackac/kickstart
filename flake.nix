@@ -80,6 +80,7 @@
 
       checks = forAllSystems (system: {
         formatting = treefmtEval.${system}.config.build.check self;
+        kickstart = import ./checks.nix { pkgs = pkgsFor system; };
         package = self.packages.${system}.default;
       });
     };

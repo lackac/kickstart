@@ -34,3 +34,6 @@ syncupp input:
 sync-nixpkgs:
   nix flake lock \
     --override-input nixpkgs github:nixos/nixpkgs/$(nix flake metadata ../nix-config --json | jq -r '.locks.nodes[.locks.nodes[.locks.root].inputs.nixpkgs].locked.rev')
+
+test-agentic:
+  nix develop --command bash test-agentic.sh
