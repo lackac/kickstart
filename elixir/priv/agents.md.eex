@@ -1,0 +1,12 @@
+<!-- kickstart-tooling -->
+## Development workflow
+
+- Read the affected code and run focused tests for each changed behavior.
+- Run `mix check`, `mix ci`, and `mix security`;
+  report actual results and checks not run.
+- Fix findings rather than weakening gates or adding blanket exclusions.
+  Preserve the ExSlop plugin when changing `.credo.exs`.
+<%= if phoenix? do %>
+- For UI or runtime changes, verify the running Phoenix application and affected
+  browser/LiveView flows; static checks alone do not establish runtime behavior.
+<% end %>

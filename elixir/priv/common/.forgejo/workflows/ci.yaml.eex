@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  check:
+    runs-on: x86_64-linux
+    env:
+      MIX_ENV: test
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install locked dependencies
+        run: |
+          nix develop --command sh -eu -c '
+            mix local.hex --force
+            mix deps.get --check-locked
+          '
+      - name: Quality and tests
+        run: nix develop --command mix ci
+
+  security:
+    runs-on: x86_64-linux
+    env:
+      MIX_ENV: test
+      HEX_OFFLINE: "false"
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install locked dependencies
+        run: |
+          nix develop --command sh -eu -c '
+            mix local.hex --force
+            mix deps.get --check-locked
+          '
+      - name: Required advisory and security checks
+        run: nix develop --command mix security
